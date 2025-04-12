@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const ChunkFile = () => {
   const [loadedDocuments, setLoadedDocuments] = useState([]);
@@ -18,11 +19,11 @@ const ChunkFile = () => {
 
   const fetchLoadedDocuments = async () => {
     try {
-      const response = await fetch('http://localhost:8001/documents?type=loaded');
+      const response = await fetch(`${apiBaseUrl}/documents?type=loaded`);
       const data = await response.json();
       setLoadedDocuments(data.documents);
 
-      const chunkedResponse = await fetch('http://localhost:8001/documents?type=chunked');
+      const chunkedResponse = await fetch(`${apiBaseUrl}/documents?type=chunked`);
       if (!chunkedResponse.ok) {
         throw new Error(`HTTP error! status: ${chunkedResponse.status}`);
       }
@@ -37,7 +38,7 @@ const ChunkFile = () => {
       const chunkedDocsWithDetails = await Promise.all(
         chunkedData.documents.map(async (doc) => {
           try {
-            const detailResponse = await fetch(`http://localhost:8001/documents/${doc.name}?type=chunked`);
+            const detailResponse = await fetch(`${apiBaseUrl}/documents/${doc.name}?type=chunked`);
             if (!detailResponse.ok) {
               console.error(`Error fetching details for ${doc.name}:`, detailResponse.status);
               return doc;
@@ -79,7 +80,7 @@ const ChunkFile = () => {
     try {
       const docId = selectedDoc.endsWith('.json') ? selectedDoc : `${selectedDoc}.json`;
       
-      const response = await fetch('http://localhost:8001/chunk', {
+      const response = await fetch(`${apiBaseUrl}/chunk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +120,7 @@ const ChunkFile = () => {
 
   const handleDeleteDocument = async (docName) => {
     try {
-      const response = await fetch(`http://localhost:8001/documents/${docName}?type=chunked`, {
+      const response = await fetch(`${apiBaseUrl}/documents/${docName}?type=chunked`, {
         method: 'DELETE',
       });
 
@@ -141,7 +142,7 @@ const ChunkFile = () => {
 
   const handleViewDocument = async (docName) => {
     try {
-      const response = await fetch(`http://localhost:8001/documents/${docName}?type=chunked`);
+      const response = await fetch(`${apiBaseUrl}/documents/${docName}?type=chunked`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

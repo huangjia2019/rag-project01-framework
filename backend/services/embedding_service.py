@@ -8,22 +8,48 @@ import boto3
 from langchain_community.embeddings import BedrockEmbeddings, OpenAIEmbeddings, HuggingFaceEmbeddings
 
 class EmbeddingProvider(str, Enum):
+    """
+    嵌入提供商枚举类，定义支持的嵌入模型提供商
+    """
     OPENAI = "openai"
     BEDROCK = "bedrock"
     HUGGINGFACE = "huggingface"
 
 class EmbeddingConfig:
+    """
+    嵌入配置类，用于存储嵌入模型的配置信息
+    """
     def __init__(self, provider: str, model_name: str):
+        """
+        初始化嵌入配置
+        
+        参数:
+            provider: 嵌入提供商名称
+            model_name: 嵌入模型名称
+        """
         self.provider = provider
         self.model_name = model_name
         self.aws_region = "ap-southeast-1"  # 可配置
 
 class EmbeddingService:
+    """
+    嵌入服务类，提供创建和管理文本嵌入的功能
+    """
     def __init__(self):
+        """初始化嵌入服务，创建嵌入工厂实例"""
         self.embedding_factory = EmbeddingFactory()
 
     def create_embeddings(self, input_data: dict, config: EmbeddingConfig) -> tuple:
-        """创建embeddings并返回必要的信息"""
+        """
+        创建文本块的嵌入向量并返回必要的信息
+        
+        参数:
+            input_data: 包含文本块和元数据的输入数据字典
+            config: 嵌入配置对象
+            
+        返回:
+            包含嵌入结果和元数据的元组
+        """
         embedding_function = self.embedding_factory.create_embedding_function(config)
         
         chunks = input_data.get('chunks', [])
@@ -94,7 +120,16 @@ class EmbeddingService:
         return results, {}
 
     def save_embeddings(self, doc_name: str, embeddings: list) -> str:
-        """保存embeddings并在顶层保存配置信息"""
+        """
+        保存嵌入向量到JSON文件
+        
+        参数:
+            doc_name: 文档名称
+            embeddings: 嵌入向量列表
+            
+        返回:
+            保存的文件路径
+        """
         os.makedirs("02-embedded-docs", exist_ok=True)
         
         # 获取第一个embedding的元数据
@@ -122,6 +157,7 @@ class EmbeddingService:
         }
         
         class CompactJSONEncoder(json.JSONEncoder):
+            """自定义JSON编码器，用于优化嵌入向量的存储格式"""
             def default(self, obj):
                 if isinstance(obj, datetime):
                     return obj.isoformat()
@@ -151,13 +187,34 @@ class EmbeddingService:
         return filepath
 
     def create_single_embedding(self, text: str, provider: str, model: str) -> list:
-        """创建单个文本的embedding"""
+        """
+        创建单个文本的嵌入向量
+        
+        参数:
+            text: 需要嵌入的文本
+            provider: 嵌入提供商
+            model: 嵌入模型名称
+            
+        返回:
+            嵌入向量列表
+        """
         config = EmbeddingConfig(provider=provider, model_name=model)
         embedding_function = self.embedding_factory.create_embedding_function(config)
         return embedding_function.embed_query(text)
 
     def get_document_embedding_config(self, collection_name: str) -> EmbeddingConfig:
-        """从已存在的文档中获取embedding配置"""
+        """
+        从已存在的文档中获取嵌入配置
+        
+        参数:
+            collection_name: 集合名称
+            
+        返回:
+            嵌入配置对象
+            
+        异常:
+            ValueError: 当找不到匹配的嵌入配置时抛出
+        """
         try:
             # 只取第一个下划线之前的部分
             doc_name = collection_name.split('_')[0]
@@ -180,8 +237,23 @@ class EmbeddingService:
             raise ValueError(f"Error getting embedding config: {str(e)}")
 
 class EmbeddingFactory:
+    """
+    嵌入工厂类，负责创建不同提供商的嵌入函数
+    """
     @staticmethod
     def create_embedding_function(config: EmbeddingConfig):
+        """
+        根据配置创建嵌入函数
+        
+        参数:
+            config: 嵌入配置对象
+            
+        返回:
+            嵌入函数对象
+            
+        异常:
+            ValueError: 当提供商不支持时抛出
+        """
         if config.provider == EmbeddingProvider.BEDROCK:
             bedrock_client = boto3.client(
                 service_name='bedrock-runtime',

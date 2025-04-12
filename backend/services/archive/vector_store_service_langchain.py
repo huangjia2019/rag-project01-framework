@@ -12,22 +12,43 @@ from pymilvus import connections, utility
 logger = logging.getLogger(__name__)
 
 class VectorDBProvider(str, Enum):
+    """向量数据库提供商枚举类"""
     MILVUS = "milvus"
     # ... 其他数据库待添加
 
 class VectorDBConfig:
+    """向量数据库配置类"""
     def __init__(self, provider: str, index_mode: str):
+        """
+        初始化向量数据库配置
+        
+        参数:
+            provider: 数据库提供商
+            index_mode: 索引模式
+        """
         self.provider = provider
         self.index_mode = index_mode
         self.milvus_uri = "03-vector-store/langchain_milvus.db"
 
 class VectorStoreService:
+    """向量存储服务类，用于管理向量数据的索引和检索"""
     def __init__(self):
+        """初始化向量存储服务"""
         self.initialized_dbs = {}
         # 确保存储目录存在
         os.makedirs("03-vector-store", exist_ok=True)
     
     def index_embeddings(self, embedding_file: str, config: VectorDBConfig) -> Dict[str, Any]:
+        """
+        将嵌入向量索引到向量数据库
+        
+        参数:
+            embedding_file: 嵌入向量文件路径
+            config: 向量数据库配置
+            
+        返回:
+            包含索引结果信息的字典
+        """
         start_time = datetime.now()
         
         # 读取embedding文件
@@ -50,6 +71,18 @@ class VectorStoreService:
         }
     
     def _load_embeddings(self, file_path: str) -> List[Dict[str, Any]]:
+        """
+        从文件加载嵌入向量
+        
+        参数:
+            file_path: 嵌入向量文件路径
+            
+        返回:
+            嵌入向量列表
+            
+        异常:
+            如果文件格式无效或读取失败，抛出异常
+        """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -67,6 +100,19 @@ class VectorStoreService:
             raise
     
     def _index_to_milvus(self, embeddings: List[Dict], config: VectorDBConfig) -> Dict[str, Any]:
+        """
+        将嵌入向量索引到Milvus数据库
+        
+        参数:
+            embeddings: 嵌入向量列表
+            config: 向量数据库配置
+            
+        返回:
+            包含索引结果的字典
+            
+        异常:
+            如果索引过程中出现错误，抛出异常
+        """
         try:
             # 准备collection名称
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -148,6 +194,15 @@ class VectorStoreService:
             connections.disconnect("default")
     
     def _get_milvus_index_type(self, index_mode: str) -> str:
+        """
+        根据索引模式获取Milvus索引类型
+        
+        参数:
+            index_mode: 索引模式
+            
+        返回:
+            Milvus索引类型字符串
+        """
         index_types = {
             "flat": "FLAT",
             "ivf_flat": "IVF_FLAT",
@@ -157,6 +212,15 @@ class VectorStoreService:
         return index_types.get(index_mode, "FLAT")
     
     def _get_milvus_index_params(self, index_mode: str) -> Dict[str, Any]:
+        """
+        根据索引模式获取Milvus索引参数
+        
+        参数:
+            index_mode: 索引模式
+            
+        返回:
+            索引参数字典
+        """
         params = {
             "flat": {},
             "ivf_flat": {"nlist": 1024},

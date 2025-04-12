@@ -7,7 +7,14 @@ __pycache__/
 
 *.db
 frontend/node_modules/
+backend/01-chunked-docs/*
+backend/01-loaded-docs/*
+backend/02-embedded-docs/*
+backend/03-vector-store/*
+backend/04-search-results/*
+backend/05-generation-results/*
 
+rag-venv
 
 # C extensions
 *.so
@@ -166,3 +173,9 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# 忽略所有 .idea 目录
+.idea/
+
+# 忽略所有 .vscode 目录
+.vscode/

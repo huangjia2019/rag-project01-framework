@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const ParseFile = () => {
   const [file, setFile] = useState(null);
@@ -26,7 +27,7 @@ const ParseFile = () => {
       formData.append('loading_method', loadingMethod);
       formData.append('parsing_option', parsingOption);
 
-      const response = await fetch('http://localhost:8001/parse', {
+      const response = await fetch(`${apiBaseUrl}/parse`, {
         method: 'POST',
         body: formData
       });

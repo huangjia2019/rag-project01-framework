@@ -297,7 +297,7 @@ async def get_providers():
 
 @app.get("/collections")
 async def get_collections(
-    provider: VectorDBProvider = Query(default=VectorDBProvider.MILVUS)
+    provider: VectorDBProvider = Query(default=VectorDBProvider.CHROMA)
 ):
     """获取指定向量数据库中的集合"""
     try:

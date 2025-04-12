@@ -1,6 +1,7 @@
 // src/pages/Search.jsx
 import React, { useState, useEffect } from 'react';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -21,12 +22,12 @@ const Search = () => {
     const fetchData = async () => {
       try {
         // 获取providers列表
-        const providersResponse = await fetch('http://localhost:8001/providers');
+        const providersResponse = await fetch(`${apiBaseUrl}/providers`);
         const providersData = await providersResponse.json();
         setProviders(providersData.providers);
 
         // 获取collections列表
-        const collectionsResponse = await fetch(`http://localhost:8001/collections?provider=${selectedProvider}`);
+        const collectionsResponse = await fetch(`${apiBaseUrl}/collections?provider=${selectedProvider}`);
         const collectionsData = await collectionsResponse.json();
         setCollections(collectionsData.collections);
       } catch (error) {
@@ -57,7 +58,7 @@ const Search = () => {
       
       console.log('发送搜索请求:', searchParams);
 
-      const response = await fetch('http://localhost:8001/search', {
+      const response = await fetch(`${apiBaseUrl}/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ const Search = () => {
 
       console.log('发送保存请求:', saveParams);
       
-      const response = await fetch('http://localhost:8001/save-search', {
+      const response = await fetch(`${apiBaseUrl}/save-search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const Generation = () => {
   const location = useLocation();
@@ -22,12 +23,12 @@ const Generation = () => {
     const fetchData = async () => {
       try {
         // 获取模型列表
-        const modelsResponse = await fetch('http://localhost:8001/generation/models');
+        const modelsResponse = await fetch(`${apiBaseUrl}/generation/models`);
         const modelsData = await modelsResponse.json();
         setModels(modelsData.models);
 
         // 获取搜索结果文件列表
-        const filesResponse = await fetch('http://localhost:8001/search-results');
+        const filesResponse = await fetch(`${apiBaseUrl}/search-results`);
         const filesData = await filesResponse.json();
         setSearchFiles(filesData.files);
       } catch (error) {
@@ -49,7 +50,7 @@ const Generation = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8001/search-results/${selectedFile}`);
+        const response = await fetch(`${apiBaseUrl}/search-results/${selectedFile}`);
         const data = await response.json();
         setQuery(data.query);
         setSearchResults(data.results);
@@ -85,7 +86,7 @@ const Generation = () => {
     setIsGenerating(true);
     setStatus('');
     try {
-      const response = await fetch('http://localhost:8001/generate', {
+      const response = await fetch(`${apiBaseUrl}/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

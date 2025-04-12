@@ -12,7 +12,14 @@ import requests
 logger = logging.getLogger(__name__)
 
 class GenerationService:
+    """
+    生成服务类：负责调用不同的模型提供商（HuggingFace、OpenAI、DeepSeek）生成回答
+    支持本地模型和API调用，并将生成结果保存到文件
+    """
     def __init__(self):
+        """
+        初始化生成服务，配置支持的模型列表和创建输出目录
+        """
         self.models = {
             "huggingface": {
                 "Llama-2-7b-chat": "meta-llama/Llama-2-7b-chat-hf",
@@ -33,7 +40,16 @@ class GenerationService:
         os.makedirs("05-generation-results", exist_ok=True)
         
     def _load_huggingface_model(self, model_name: str):
-        """加载HuggingFace模型"""
+        """
+        加载HuggingFace模型
+        
+        参数:
+            model_name: 模型名称，对应self.models["huggingface"]中的键
+            
+        返回:
+            model: 加载的模型
+            tokenizer: 对应的分词器
+        """
         try:
             model = AutoModelForCausalLM.from_pretrained(
                 self.models["huggingface"][model_name],
@@ -55,7 +71,18 @@ class GenerationService:
         context: str,
         max_length: int = 512
     ) -> str:
-        """使用HuggingFace模型生成回答"""
+        """
+        使用HuggingFace模型生成回答
+        
+        参数:
+            model_name: 模型名称
+            query: 用户查询
+            context: 上下文信息
+            max_length: 生成文本的最大长度
+            
+        返回:
+            生成的回答文本
+        """
         try:
             model, tokenizer = self._load_huggingface_model(model_name)
             
@@ -92,7 +119,18 @@ class GenerationService:
         context: str,
         api_key: Optional[str] = None
     ) -> str:
-        """使用OpenAI API生成回答"""
+        """
+        使用OpenAI API生成回答
+        
+        参数:
+            model_name: 模型名称
+            query: 用户查询
+            context: 上下文信息
+            api_key: OpenAI API密钥，如不提供则从环境变量获取
+            
+        返回:
+            生成的回答文本
+        """
         try:
             if not api_key:
                 api_key = os.getenv("OPENAI_API_KEY")
@@ -127,7 +165,19 @@ class GenerationService:
         api_key: Optional[str] = None,
         show_reasoning: bool = True
     ) -> str:
-        """使用DeepSeek API生成回答"""
+        """
+        使用DeepSeek API生成回答
+        
+        参数:
+            model_name: 模型名称
+            query: 用户查询
+            context: 上下文信息
+            api_key: DeepSeek API密钥，如不提供则从环境变量获取
+            show_reasoning: 是否显示推理过程（仅对推理模型有效）
+            
+        返回:
+            生成的回答文本，对于推理模型可能包含思维过程
+        """
         try:
             if not api_key:
                 api_key = os.getenv("DEEPSEEK_API_KEY")
@@ -176,7 +226,20 @@ class GenerationService:
         api_key: Optional[str] = None,
         show_reasoning: bool = True
     ) -> Dict:
-        """生成回答并保存结果"""
+        """
+        生成回答并保存结果
+        
+        参数:
+            provider: 模型提供商，可选值为"huggingface"、"openai"、"deepseek"
+            model_name: 模型名称
+            query: 用户查询
+            search_results: 搜索结果列表，用于构建上下文
+            api_key: API密钥（对于API调用）
+            show_reasoning: 是否显示推理过程（仅对DeepSeek推理模型有效）
+            
+        返回:
+            包含生成回答和保存路径的字典
+        """
         try:
             # 准备上下文
             context = "\n\n".join([
@@ -222,5 +285,10 @@ class GenerationService:
             raise
 
     def get_available_models(self) -> Dict:
-        """获取可用的模型列表"""
+        """
+        获取可用的模型列表
+        
+        返回:
+            包含所有支持模型的字典
+        """
         return self.models 

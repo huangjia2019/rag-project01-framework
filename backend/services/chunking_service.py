@@ -5,7 +5,33 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 logger = logging.getLogger(__name__)
 
 class ChunkingService:
+    """
+    文本分块服务，提供多种文本分块策略
+    
+    该服务支持以下分块方法：
+    - by_pages: 按页面分块，每页作为一个块
+    - fixed_size: 按固定大小分块
+    - by_paragraphs: 按段落分块
+    - by_sentences: 按句子分块
+    """
+    
     def chunk_text(self, text: str, method: str, metadata: dict, page_map: list = None, chunk_size: int = 1000) -> dict:
+        """
+        将文本按指定方法分块
+        
+        Args:
+            text: 原始文本内容
+            method: 分块方法，支持 'by_pages', 'fixed_size', 'by_paragraphs', 'by_sentences'
+            metadata: 文档元数据
+            page_map: 页面映射列表，每个元素包含页码和页面文本
+            chunk_size: 固定大小分块时的块大小
+            
+        Returns:
+            包含分块结果的文档数据结构
+        
+        Raises:
+            ValueError: 当分块方法不支持或页面映射为空时
+        """
         try:
             if not page_map:
                 raise ValueError("Page map is required for chunking.")
@@ -80,6 +106,16 @@ class ChunkingService:
             raise
 
     def _fixed_size_chunks(self, text: str, chunk_size: int) -> list[dict]:
+        """
+        将文本按固定大小分块
+        
+        Args:
+            text: 要分块的文本
+            chunk_size: 每块的最大字符数
+            
+        Returns:
+            分块后的文本列表
+        """
         chunks = []
         words = text.split()
         current_chunk = []
@@ -100,10 +136,28 @@ class ChunkingService:
         return chunks
 
     def _paragraph_chunks(self, text: str) -> list[dict]:
+        """
+        将文本按段落分块
+        
+        Args:
+            text: 要分块的文本
+            
+        Returns:
+            分块后的段落列表
+        """
         paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
         return [{"text": para} for para in paragraphs]
 
     def _sentence_chunks(self, text: str) -> list[dict]:
+        """
+        将文本按句子分块
+        
+        Args:
+            text: 要分块的文本
+            
+        Returns:
+            分块后的句子列表
+        """
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,

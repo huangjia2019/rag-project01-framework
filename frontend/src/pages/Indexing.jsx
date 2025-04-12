@@ -1,10 +1,11 @@
 // src/pages/Indexing.jsx
 import React, { useState, useEffect } from 'react';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const Indexing = () => {
   const [embeddingFile, setEmbeddingFile] = useState('');
-  const [vectorDb, setVectorDb] = useState('milvus');
+  const [vectorDb, setVectorDb] = useState('chroma');
   const [indexMode, setIndexMode] = useState('standard');
   const [status, setStatus] = useState('');
   const [embeddedFiles, setEmbeddedFiles] = useState([]);
@@ -13,7 +14,7 @@ const Indexing = () => {
   const [selectedCollection, setSelectedCollection] = useState('');
   const [collectionDetails, setCollectionDetails] = useState(null);
   const [providers, setProviders] = useState([]);
-  const [selectedProvider, setSelectedProvider] = useState('milvus');
+  const [selectedProvider, setSelectedProvider] = useState('chroma');
 
   // 数据库和索引模式的配置
   const dbConfigs = {
@@ -69,7 +70,7 @@ const Indexing = () => {
     const fetchData = async () => {
       try {
         // 获取providers列表
-        const providersResponse = await fetch('http://localhost:8001/providers');
+        const providersResponse = await fetch(`${apiBaseUrl}/providers`);
         const providersData = await providersResponse.json();
         // 确保 Chroma 在providers列表中
         const allProviders = [
@@ -79,7 +80,7 @@ const Indexing = () => {
         setProviders(allProviders);
 
         // 获取collections列表
-        const collectionsResponse = await fetch(`http://localhost:8001/collections?provider=${selectedProvider}`);
+        const collectionsResponse = await fetch(`${apiBaseUrl}/collections?provider=${selectedProvider}`);
         const collectionsData = await collectionsResponse.json();
         setCollections(collectionsData.collections);
       } catch (error) {
@@ -92,7 +93,7 @@ const Indexing = () => {
 
   const fetchEmbeddedFiles = async () => {
     try {
-      const response = await fetch('http://localhost:8001/list-embedded');
+      const response = await fetch(`${apiBaseUrl}/list-embedded`);
       const data = await response.json();
       if (data.documents) {
         setEmbeddedFiles(data.documents.map(doc => ({
@@ -109,7 +110,7 @@ const Indexing = () => {
 
   const fetchCollections = async () => {
     try {
-      const response = await fetch(`http://localhost:8001/collections/${vectorDb}`);
+      const response = await fetch(`${apiBaseUrl}/collections/${vectorDb}`);
       const data = await response.json();
       setCollections(data.collections || []);
     } catch (error) {
@@ -125,7 +126,7 @@ const Indexing = () => {
 
     setStatus('Indexing...');
     try {
-      const response = await fetch('http://localhost:8001/index', {
+      const response = await fetch(`${apiBaseUrl}/index`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const Indexing = () => {
     if (!collectionName) return;
     
     try {
-      const response = await fetch(`http://localhost:8001/collections/${selectedProvider}/${collectionName}`);
+      const response = await fetch(`${apiBaseUrl}/collections/${selectedProvider}/${collectionName}`);
       const data = await response.json();
       
       // 只包含有实际值的属性
@@ -182,12 +183,12 @@ const Indexing = () => {
     
     if (window.confirm(`Are you sure you want to delete collection "${collectionName}"?`)) {
       try {
-        await fetch(`http://localhost:8001/collections/${selectedProvider}/${collectionName}`, {
+        await fetch(`${apiBaseUrl}/collections/${selectedProvider}/${collectionName}`, {
           method: 'DELETE',
         });
         setSelectedCollection('');
         // 重新获取collections列表
-        const response = await fetch(`http://localhost:8001/collections?provider=${selectedProvider}`);
+        const response = await fetch(`${apiBaseUrl}/collections?provider=${selectedProvider}`);
         const data = await response.json();
         setCollections(data.collections);
       } catch (error) {

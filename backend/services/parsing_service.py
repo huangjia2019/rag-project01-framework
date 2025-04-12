@@ -7,7 +7,32 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class ParsingService:
+    """
+    PDF文档解析服务类
+    
+    该类提供多种解析策略来提取和构建PDF文档内容，包括：
+    - 全文提取
+    - 逐页解析
+    - 基于标题的分段
+    - 文本和表格混合解析
+    """
+
     def parse_pdf(self, text: str, method: str, metadata: dict, page_map: list = None) -> dict:
+        """
+        使用指定方法解析PDF文档
+
+        参数:
+            text (str): PDF文档的文本内容
+            method (str): 解析方法 ('all_text', 'by_pages', 'by_titles', 或 'text_and_tables')
+            metadata (dict): 文档元数据，包括文件名和其他属性
+            page_map (list): 包含每页内容和元数据的字典列表
+
+        返回:
+            dict: 解析后的文档数据，包括元数据和结构化内容
+
+        异常:
+            ValueError: 当page_map为空或指定了不支持的解析方法时抛出
+        """
         try:
             if not page_map:
                 raise ValueError("Page map is required for parsing.")
@@ -44,6 +69,15 @@ class ParsingService:
             raise
 
     def _parse_all_text(self, page_map: list) -> list:
+        """
+        将文档中的所有文本内容提取为连续流
+
+        参数:
+            page_map (list): 包含每页内容的字典列表
+
+        返回:
+            list: 包含带页码的文本内容的字典列表
+        """
         return [{
             "type": "Text",
             "content": page["text"],
@@ -51,6 +85,15 @@ class ParsingService:
         } for page in page_map]
 
     def _parse_by_pages(self, page_map: list) -> list:
+        """
+        逐页解析文档，保持页面边界
+
+        参数:
+            page_map (list): 包含每页内容的字典列表
+
+        返回:
+            list: 包含带页码的分页内容的字典列表
+        """
         parsed_content = []
         for page in page_map:
             parsed_content.append({
@@ -61,6 +104,18 @@ class ParsingService:
         return parsed_content
 
     def _parse_by_titles(self, page_map: list) -> list:
+        """
+        通过识别标题来解析文档并将内容组织成章节
+
+        使用简单的启发式方法识别标题：
+        长度小于60个字符且全部大写的行被视为章节标题
+
+        参数:
+            page_map (list): 包含每页内容的字典列表
+
+        返回:
+            list: 包含带标题和页码的分章节内容的字典列表
+        """
         parsed_content = []
         current_title = None
         current_content = []
@@ -94,6 +149,18 @@ class ParsingService:
         return parsed_content
 
     def _parse_text_and_tables(self, page_map: list) -> list:
+        """
+        通过分离文本和表格内容来解析文档
+
+        使用基本的表格检测启发式方法（存在'|'或制表符）
+        来识别潜在的表格内容
+
+        参数:
+            page_map (list): 包含每页内容的字典列表
+
+        返回:
+            list: 包含分离的文本和表格内容（带页码）的字典列表
+        """
         parsed_content = []
         for page in page_map:
             # Extract tables using tabula-py or similar library

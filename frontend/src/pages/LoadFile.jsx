@@ -1,6 +1,7 @@
 // src/pages/LoadFile.jsx
 import React, { useState, useEffect } from 'react';
 import RandomImage from '../components/RandomImage';
+import { apiBaseUrl } from '../config/config';
 
 const LoadFile = () => {
   const [file, setFile] = useState(null);
@@ -27,7 +28,7 @@ const LoadFile = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch('http://localhost:8001/documents?type=loaded');
+      const response = await fetch(`${apiBaseUrl}/documents?type=loaded`);
       const data = await response.json();
       setDocuments(data.documents);
     } catch (error) {
@@ -55,7 +56,7 @@ const LoadFile = () => {
         formData.append('chunking_options', JSON.stringify(chunkingOptions));
       }
 
-      const response = await fetch('http://localhost:8001/load', {
+      const response = await fetch(`${apiBaseUrl}/load`, {
         method: 'POST',
         body: formData
       });
@@ -78,7 +79,7 @@ const LoadFile = () => {
 
   const handleDeleteDocument = async (docName) => {
     try {
-      const response = await fetch(`http://localhost:8001/documents/${docName}`, {
+      const response = await fetch(`${apiBaseUrl}/documents/${docName}`, {
         method: 'DELETE',
       });
 
@@ -101,7 +102,7 @@ const LoadFile = () => {
   const handleViewDocument = async (doc) => {
     try {
       setStatus('Loading document...');
-      const response = await fetch(`http://localhost:8001/documents/${doc.name}.json`);
+      const response = await fetch(`${apiBaseUrl}/documents/${doc.name}.json`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
