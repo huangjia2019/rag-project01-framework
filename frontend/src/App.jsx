@@ -8,6 +8,7 @@ import EmbeddingFile from './pages/EmbeddingFile';
 import Indexing from './pages/Indexing';
 import Search from './pages/Search';
 import ParseFile from './pages/ParseFile';
+import ParseMDFile from './pages/ParseMDFile';
 import Generation from './pages/Generation';
 
 const App = () => {
@@ -20,6 +21,7 @@ const App = () => {
             <Route path="/load-file" element={<LoadFile />} />  
             <Route path="/chunk-file" element={<ChunkFile />} />  
             <Route path="/parse-file" element={<ParseFile />} />
+            <Route path="/parse-md-file" element={<ParseMDFile />} />
             <Route path="/embedding" element={<EmbeddingFile />} />
             <Route path="/indexing" element={<Indexing />} />
             <Route path="/search" element={<Search />} />

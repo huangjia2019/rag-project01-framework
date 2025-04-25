@@ -9,6 +9,7 @@ from services.embedding_service import EmbeddingService, EmbeddingConfig
 from services.vector_store_service import VectorStoreService, VectorDBConfig
 from services.search_service import SearchService
 from services.parsing_service import ParsingService
+from services.parse_md_service import ParseMDService
 import logging
 from enum import Enum
 from utils.config import VectorDBProvider
@@ -968,4 +969,54 @@ async def get_search_result(file_id: str):
             
     except Exception as e:
         logger.error(f"Error reading search result file: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/parse_md")
+async def parse_pdf_to_md(
+    file: UploadFile = File(...),
+    loading_method: str = Form(...),
+    parsing_option: str = Form(...)
+):
+    try:
+        # Create output directories if they don't exist
+        os.makedirs("temp", exist_ok=True)
+        os.makedirs("05-markdown-docs", exist_ok=True)
+        os.makedirs(os.path.join("05-markdown-docs", "images"), exist_ok=True)
+        
+        # Save uploaded file
+        temp_path = os.path.join("temp", file.filename)
+        with open(temp_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        # Prepare metadata
+        metadata = {
+            "filename": file.filename,
+            "loading_method": loading_method,
+            "original_file_size": len(content),
+            "processing_date": datetime.now().isoformat(),
+            "parsing_method": parsing_option,
+            "temp_path": temp_path  # Include the temp file path
+        }
+        
+        # Use ParseMDService directly with the file path
+        parse_md_service = ParseMDService()
+        parsed_content = parse_md_service.parse_pdf_to_md(
+            parsing_option, 
+            metadata
+        )
+        
+        # Log success
+        logger.info(f"Successfully converted {file.filename} to Markdown with {parsing_option} option")
+        
+        # Clean up temp file - only delete after processing
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        
+        return {"parsed_content": parsed_content}
+    except Exception as e:
+        logger.error(f"Error parsing file to Markdown: {str(e)}")
+        # Clean up temp file in case of error
+        if 'temp_path' in locals() and os.path.exists(temp_path):
+            os.remove(temp_path)
         raise HTTPException(status_code=500, detail=str(e)) 

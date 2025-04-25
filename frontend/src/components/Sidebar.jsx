@@ -8,6 +8,7 @@ const Sidebar = () => {
     { to: "/load-file", text: "Load File" },
     { to: "/chunk-file", text: "Chunk File" },
     { to: "/parse-file", text: "Parse File" },
+    { to: "/parse-md-file", text: "PDF to Markdown" },
     { to: "/embedding", text: "Embedding File" },
     { to: "/indexing", text: "Indexing with Vector DB" },
     { to: "/search", text: "Similarity Search" },
