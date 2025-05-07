@@ -84,23 +84,9 @@ npm run dev -- --mode production
 
 - Python 环境管理 [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/)
 
-#### 1. 安装 Miniconda
+#### 1. 安装环境
 
-```shell
-mkdir -p ~/miniconda3
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
-bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-rm -rf ~/miniconda3/miniconda.sh
-```
-
-安装完成后，建议新建一个 Python 虚拟环境，命名为 `langchain`。
-
-```shell
-conda create -n rag-project01 python=3.11.9
-
-# 激活环境
-conda activate rag-project01 
-```
+环境的安装和配置，请参考课程文档以及视频中的说明。
 
 #### 2. 安装后端依赖：
 
