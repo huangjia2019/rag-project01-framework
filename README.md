@@ -180,9 +180,9 @@ pip install -r requirements_mac.txt
 
 # Mac Apple M1 芯片（在 MacOS Sonama 14.5 版本上测试OK）
 # 清华镜像源
-pip3.11 install --default-timeout=1000 install -r requirements_mac_m1_py3.11.12.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip3.11 install --default-timeout=1000 -r requirements_mac_m1_py3.11.12.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 # 阿里云镜像源
-pip3.11 install --default-timeout=1000 install -r requirements_mac_m1_py3.11.12.txt -i https://mirrors.aliyun.com/pypi/simple
+pip3.11 install --default-timeout=1000 -r requirements_mac_m1_py3.11.12.txt -i https://mirrors.aliyun.com/pypi/simple
 ```
 #### 3. 使用本地下载的 HuggingFace 模型（可选步骤）
 
